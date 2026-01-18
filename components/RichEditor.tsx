@@ -301,12 +301,18 @@ const RichEditor: React.FC<RichEditorProps> = ({
               </span>
               {activeIssue.status === 'fixed' && <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><ICONS.CheckCircle className="w-3 h-3"/> Fixed</span>}
             </div>
-            <div className="text-xs text-slate-300 mb-2">{activeIssue.reason}</div>
+            <div className="text-xs text-slate-300 mb-3">{activeIssue.reason}</div>
             
             {activeIssue.status === 'pending' && (
-              <div className="bg-slate-900/50 rounded-lg p-2 border border-slate-700/50">
-                <div className="text-[10px] text-slate-500 mb-1">Suggestion</div>
-                <div className="text-sm font-semibold text-emerald-400 mb-3">{activeIssue.suggestion}</div>
+              <div className="bg-slate-900/50 rounded-lg p-2 border border-slate-700/50 space-y-3">
+                <div>
+                  <div className="text-[10px] text-slate-500 mb-1 uppercase font-bold tracking-wider">Source (Chinese)</div>
+                  <div className="text-xs text-slate-300 italic">"{activeIssue.original_segment}"</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-slate-500 mb-1 uppercase font-bold tracking-wider">Suggestion</div>
+                  <div className="text-sm font-semibold text-emerald-400">{activeIssue.suggestion}</div>
+                </div>
                 <button
                   onClick={() => {
                     onFixIssue?.(activeIssue);
