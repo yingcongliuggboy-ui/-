@@ -12,12 +12,12 @@ export default defineConfig(({ mode }) => {
       port: 5173
     },
     define: {
-      // Define Gemini API key for the application
-      'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(
-        env.VITE_GEMINI_API_KEY || 
-        env.GEMINI_API_KEY || 
-        process.env.VITE_GEMINI_API_KEY || 
-        process.env.GEMINI_API_KEY || 
+      // Define Groq API key for the application
+      'import.meta.env.VITE_GROQ_API_KEY': JSON.stringify(
+        env.VITE_GROQ_API_KEY || 
+        env.GROQ_API_KEY || 
+        process.env.VITE_GROQ_API_KEY || 
+        process.env.GROQ_API_KEY || 
         ''
       )
     }
