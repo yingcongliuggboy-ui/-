@@ -21,6 +21,7 @@ const App: React.FC = () => {
   
   // State for previewing history
   const [previewHistoryEntry, setPreviewHistoryEntry] = useState<HistoryEntry | null>(null);
+  const [activeIssueId, setActiveIssueId] = useState<string | null>(null);
   
   const auditAbortController = useRef<AbortController | null>(null);
 
@@ -376,6 +377,12 @@ const App: React.FC = () => {
                 value={sourceText}
                 onChange={setSourceText}
                 placeholder="粘贴你的中文文案，支持 Markdown..."
+                // Audit props for source
+                issues={previewHistoryEntry ? [] : auditReport?.issues}
+                isReviewMode={!previewHistoryEntry && mode === AppMode.AUDIT && !!auditReport}
+                activeIssueId={activeIssueId}
+                onIssueClick={setActiveIssueId}
+                isSource={true}
               />
             </div>
             <div className="flex flex-col h-full overflow-hidden">
@@ -389,6 +396,8 @@ const App: React.FC = () => {
                 issues={previewHistoryEntry ? [] : auditReport?.issues} // Don't show current issues in preview mode
                 isReviewMode={!previewHistoryEntry && mode === AppMode.AUDIT && !!auditReport}
                 onFixIssue={handleFixIssue}
+                activeIssueId={activeIssueId}
+                onIssueClick={setActiveIssueId}
                 // History Diff props
                 diffBase={previewHistoryEntry ? previewHistoryEntry.previousText : null}
               />

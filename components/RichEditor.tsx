@@ -13,6 +13,9 @@ interface RichEditorProps {
   onFixIssue?: (issue: AuditIssue) => void;
   isReviewMode?: boolean;
   diffBase?: string | null;
+  activeIssueId?: string | null;
+  onIssueClick?: (issueId: string | null) => void;
+  isSource?: boolean;
 }
 
 interface PopoverState {
@@ -31,7 +34,10 @@ const RichEditor: React.FC<RichEditorProps> = ({
   issues = [], 
   onFixIssue,
   isReviewMode = false,
-  diffBase = null
+  diffBase = null,
+  activeIssueId = null,
+  onIssueClick,
+  isSource = false
 }) => {
   const [activePopover, setActivePopover] = useState<PopoverState | null>(null);
   const [copied, setCopied] = useState(false);
@@ -49,6 +55,13 @@ const RichEditor: React.FC<RichEditorProps> = ({
     }
   };
 
+  // Sync internal popover state with external activeIssueId
+  useEffect(() => {
+    if (activeIssueId === null) {
+      setActivePopover(null);
+    }
+  }, [activeIssueId]);
+
   // Close popover when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,38 +70,53 @@ const RichEditor: React.FC<RichEditorProps> = ({
       }
       if (activePopover) {
         setActivePopover(null);
+        onIssueClick?.(null);
       }
     };
     window.addEventListener('click', handleClickOutside);
-    window.addEventListener('scroll', () => setActivePopover(null), true);
+    window.addEventListener('scroll', () => {
+      setActivePopover(null);
+      onIssueClick?.(null);
+    }, true);
     return () => {
       window.removeEventListener('click', handleClickOutside);
-      window.removeEventListener('scroll', () => setActivePopover(null), true);
+      window.removeEventListener('scroll', () => {
+        setActivePopover(null);
+        onIssueClick?.(null);
+      }, true);
     };
-  }, [activePopover]);
+  }, [activePopover, onIssueClick]);
 
   const handleIssueClick = (event: React.MouseEvent<HTMLSpanElement>, issueId: string) => {
     event.stopPropagation();
+    
     if (activePopover?.id === issueId) {
       setActivePopover(null);
+      onIssueClick?.(null);
       return;
     }
-    const rect = event.currentTarget.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const spaceAbove = rect.top;
-    const spaceBelow = viewportHeight - rect.bottom;
-    let align: 'top' | 'bottom' = 'top';
-    let y = rect.top - 10;
-    if (spaceAbove < 200 && spaceBelow > 200) {
-      align = 'bottom';
-      y = rect.bottom + 10;
+
+    onIssueClick?.(issueId);
+
+    // Only show popover for target text (not source)
+    if (!isSource) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceAbove = rect.top;
+      const spaceBelow = viewportHeight - rect.bottom;
+      let align: 'top' | 'bottom' = 'top';
+      let y = rect.top - 10;
+      if (spaceAbove < 200 && spaceBelow > 200) {
+        align = 'bottom';
+        y = rect.bottom + 10;
+      }
+      setActivePopover({
+        id: issueId,
+        x: rect.left + (rect.width / 2),
+        y: y,
+        align
+      });
     }
-    setActivePopover({
-      id: issueId,
-      x: rect.left + (rect.width / 2),
-      y: y,
-      align
-    });
   };
 
   const getIssueColorClass = (type: string, status: string) => {
@@ -167,8 +195,8 @@ const RichEditor: React.FC<RichEditorProps> = ({
     let parts: { text: string; issue?: AuditIssue }[] = [{ text: value }];
 
     issues.filter(i => i.status !== 'ignored').forEach(issue => {
-      const target = issue.target_segment;
-      if (!target) return;
+      const segment = isSource ? issue.original_segment : issue.target_segment;
+      if (!segment) return;
 
       const newParts: typeof parts = [];
       parts.forEach(part => {
@@ -177,15 +205,15 @@ const RichEditor: React.FC<RichEditorProps> = ({
           return;
         }
 
-        const idx = part.text.indexOf(target);
+        const idx = part.text.indexOf(segment);
         if (idx === -1) {
           newParts.push(part);
         } else {
           const before = part.text.substring(0, idx);
-          const after = part.text.substring(idx + target.length);
+          const after = part.text.substring(idx + segment.length);
           
           if (before) newParts.push({ text: before });
-          newParts.push({ text: target, issue: issue });
+          newParts.push({ text: segment, issue: issue });
           if (after) newParts.push({ text: after });
         }
       });
@@ -197,12 +225,12 @@ const RichEditor: React.FC<RichEditorProps> = ({
         {parts.map((part, idx) => {
           if (!part.issue) return <span key={idx}>{part.text}</span>;
 
-          const isActive = activePopover?.id === part.issue.id;
+          const isActive = (activeIssueId === part.issue.id) || (activePopover?.id === part.issue.id);
           return (
             <span
               key={idx}
               onClick={(e) => handleIssueClick(e, part.issue!.id)}
-              className={`cursor-pointer underline rounded px-0.5 transition-colors ${getIssueColorClass(part.issue.type, part.issue.status)} ${isActive ? 'ring-2 ring-white/20' : ''}`}
+              className={`cursor-pointer underline rounded px-0.5 transition-all duration-200 ${getIssueColorClass(part.issue.type, part.issue.status)} ${isActive ? 'ring-2 ring-white/40 bg-white/10 scale-105 inline-block' : ''}`}
             >
               {part.text}
             </span>
