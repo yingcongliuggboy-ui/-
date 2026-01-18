@@ -82,7 +82,7 @@ IMPORTANT: Return ONLY valid JSON, no markdown code blocks, no explanations.`;
       model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemInstruction },
-        { role: 'user', content: `Source (Chinese):\n${sourceText}\n\nTranslation (${targetLang}):\n${targetText}` }
+        { role: 'user', content: `Source (Chinese):\n${sourceText}\n\nTranslation (${targetLang}):\n${targetText}\n\nIMPORTANT: The "target_segment" in your JSON MUST be an EXACT substring from the Translation provided above. If you cannot find an exact match, do not report it as an issue.` }
       ],
       response_format: { type: 'json_object' }
     });

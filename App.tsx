@@ -124,12 +124,22 @@ const App: React.FC = () => {
 
   const handleFixIssue = (issue: AuditIssue) => {
     const prevText = targetText;
-    if (!prevText.includes(issue.target_segment)) {
-      alert("Could not find exact text segment. It might have been already changed.");
-      return;
+    
+    // Try exact match first
+    let newText = prevText;
+    if (prevText.includes(issue.target_segment)) {
+      newText = prevText.replace(issue.target_segment, issue.suggestion);
+    } else {
+      // Try a more flexible match (ignoring extra whitespace/newlines that AI might have added)
+      const normalizedTarget = issue.target_segment.trim();
+      if (prevText.includes(normalizedTarget)) {
+        newText = prevText.replace(normalizedTarget, issue.suggestion);
+      } else {
+        alert("Could not find exact text segment. It might have been already changed.");
+        return;
+      }
     }
-
-    const newText = prevText.replace(issue.target_segment, issue.suggestion);
+    
     setTargetText(newText);
     
     if (auditReport) {
