@@ -34,8 +34,20 @@ const RichEditor: React.FC<RichEditorProps> = ({
   diffBase = null
 }) => {
   const [activePopover, setActivePopover] = useState<PopoverState | null>(null);
+  const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  const handleCopy = async () => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
 
   // Close popover when clicking outside
   useEffect(() => {
@@ -232,10 +244,31 @@ const RichEditor: React.FC<RichEditorProps> = ({
             {isReviewMode && <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-[10px] font-bold rounded-full animate-pulse">REVIEW MODE</span>}
             {diffBase && <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-bold rounded-full">PREVIEWING CHANGE</span>}
           </div>
-          <div className="flex gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-700"></div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleCopy}
+              disabled={!value}
+              className={`p-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                copied 
+                  ? 'bg-emerald-500/20 text-emerald-400' 
+                  : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800'
+              } ${!value ? 'opacity-30 cursor-not-allowed' : ''}`}
+              title="Copy all text"
+            >
+              {copied ? (
+                <>
+                  <ICONS.Check className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold">COPIED</span>
+                </>
+              ) : (
+                <ICONS.Copy className="w-3.5 h-3.5" />
+              )}
+            </button>
+            <div className="flex gap-1.5 ml-1">
+              <div className="w-2 h-2 rounded-full bg-slate-700/50"></div>
+              <div className="w-2 h-2 rounded-full bg-slate-700/50"></div>
+              <div className="w-2 h-2 rounded-full bg-slate-700/50"></div>
+            </div>
           </div>
         </div>
         
