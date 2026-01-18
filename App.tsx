@@ -202,15 +202,15 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col font-sans selection:bg-blue-500/30 overflow-hidden">
       {/* Navbar */}
-      <nav className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-40 flex-shrink-0">
+      <nav className="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl px-4 md:px-6 flex items-center justify-between sticky top-0 z-40 flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
             <ICONS.Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">CopyFlow</span>
+          <span className="text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">CopyFlow</span>
         </div>
 
-        <div className="bg-slate-950 p-1 rounded-xl border border-slate-800 hidden md:flex">
+        <div className="bg-slate-950 p-1 rounded-xl border border-slate-800 hidden sm:flex">
           <button
             onClick={() => {
                 setMode(AppMode.TRANSLATE);
@@ -256,15 +256,15 @@ const App: React.FC = () => {
       </nav>
 
       {/* Control Bar */}
-      <div className="bg-slate-900 border-b border-slate-800 p-4 z-30 flex flex-wrap gap-4 items-center justify-between flex-shrink-0">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="flex flex-col gap-1">
+      <div className="bg-slate-900 border-b border-slate-800 p-3 md:p-4 z-30 flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between flex-shrink-0">
+        <div className="flex flex-row gap-3 md:gap-4 items-center overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
+          <div className="flex flex-col gap-1 min-w-[140px]">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Target Language</label>
             <div className="relative group">
               <select
                 value={selectedLang}
                 onChange={(e) => setSelectedLang(e.target.value as LanguageCode)}
-                className="appearance-none bg-slate-950 border border-slate-800 text-slate-300 text-sm rounded-xl px-4 py-2 pr-10 focus:ring-2 focus:ring-blue-500/50 outline-none cursor-pointer transition-all hover:border-slate-700"
+                className="w-full appearance-none bg-slate-950 border border-slate-800 text-slate-300 text-xs md:text-sm rounded-xl px-3 md:px-4 py-2 pr-10 focus:ring-2 focus:ring-blue-500/50 outline-none cursor-pointer transition-all hover:border-slate-700"
               >
                 {LANGUAGES.map((lang) => (
                   <option key={lang.code} value={lang.code}>
@@ -280,13 +280,13 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 min-w-[120px]">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Tone</label>
             <div className="relative group">
               <select
                 value={selectedTone}
                 onChange={(e) => setSelectedTone(e.target.value as ToneType)}
-                className="appearance-none bg-slate-950 border border-slate-800 text-slate-300 text-sm rounded-xl px-4 py-2 pr-10 focus:ring-2 focus:ring-blue-500/50 outline-none cursor-pointer transition-all hover:border-slate-700"
+                className="w-full appearance-none bg-slate-950 border border-slate-800 text-slate-300 text-xs md:text-sm rounded-xl px-3 md:px-4 py-2 pr-10 focus:ring-2 focus:ring-blue-500/50 outline-none cursor-pointer transition-all hover:border-slate-700"
               >
                 {TONES.map((tone) => (
                   <option key={tone} value={tone}>
@@ -303,7 +303,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <button 
             onClick={() => {
               setSourceText('');
@@ -313,7 +313,7 @@ const App: React.FC = () => {
               setShowAuditPanel(false);
               setPreviewHistoryEntry(null);
             }}
-            className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
+            className="p-2 md:p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
             title="Clear all"
           >
             <ICONS.RotateCcw className="w-5 h-5" />
@@ -323,7 +323,7 @@ const App: React.FC = () => {
             <button
               onClick={handleGenerate}
               disabled={isGenerating || !sourceText.trim()}
-              className={`flex items-center gap-2 px-8 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl shadow-blue-500/20 ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 md:px-8 py-2 md:py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl shadow-blue-500/20 ${
                 isGenerating || !sourceText.trim()
                   ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:scale-[1.02] active:scale-95'
@@ -345,7 +345,7 @@ const App: React.FC = () => {
             <button
               onClick={handleAudit}
               disabled={isAuditing || !sourceText.trim() || !targetText.trim()}
-              className={`flex items-center gap-2 px-8 py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl shadow-indigo-500/20 ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 md:px-8 py-2 md:py-2.5 rounded-xl font-bold text-sm transition-all shadow-xl shadow-indigo-500/20 ${
                 isAuditing || !sourceText.trim() || !targetText.trim()
                   ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:scale-[1.02] active:scale-95'
@@ -368,9 +368,9 @@ const App: React.FC = () => {
       </div>
 
       {/* Main Split View + Sidebar Container */}
-      <main className="flex-1 flex overflow-hidden bg-slate-950">
-        <div className="flex-1 flex flex-col p-6 overflow-hidden">
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
+      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-slate-950">
+        <div className="flex-1 flex flex-col p-4 md:p-6 overflow-y-auto lg:overflow-hidden">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 min-h-0">
             <div className="flex flex-col h-full overflow-hidden">
               <RichEditor
                 label="Source (Chinese)"
@@ -407,7 +407,7 @@ const App: React.FC = () => {
 
         {/* Audit Panel Sidebar */}
         {showAuditPanel && (
-          <div className="w-[450px] flex-shrink-0 border-l border-slate-800 bg-slate-900 shadow-xl transition-all duration-300">
+          <div className="w-full lg:w-[450px] h-[400px] lg:h-auto flex-shrink-0 border-t lg:border-t-0 lg:border-l border-slate-800 bg-slate-900 shadow-xl transition-all duration-300 overflow-hidden">
             <AuditReportPanel 
               report={auditReport}
               history={history}

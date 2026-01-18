@@ -263,8 +263,8 @@ const RichEditor: React.FC<RichEditorProps> = ({
 
   return (
     <>
-      <div ref={containerRef} className={`flex flex-col h-full bg-slate-900 border rounded-xl overflow-hidden shadow-2xl transition-all duration-300 ${isReviewMode ? 'border-indigo-500/50 shadow-indigo-500/10' : diffBase ? 'border-amber-500/50 shadow-amber-500/10' : 'border-slate-800 focus-within:border-blue-500/50'}`}>
-        <div className={`flex items-center justify-between px-4 py-3 border-b flex-shrink-0 ${isReviewMode ? 'bg-indigo-900/20 border-indigo-900/50' : diffBase ? 'bg-amber-900/20 border-amber-900/50' : 'bg-slate-800/50 border-slate-800'}`}>
+      <div ref={containerRef} className={`flex flex-col h-[350px] lg:h-full bg-slate-900 border rounded-xl overflow-hidden shadow-2xl transition-all duration-300 ${isReviewMode ? 'border-indigo-500/50 shadow-indigo-500/10' : diffBase ? 'border-amber-500/50 shadow-amber-500/10' : 'border-slate-800 focus-within:border-blue-500/50'}`}>
+        <div className={`flex items-center justify-between px-3 md:px-4 py-2 md:py-3 border-b flex-shrink-0 ${isReviewMode ? 'bg-indigo-900/20 border-indigo-900/50' : diffBase ? 'bg-amber-900/20 border-amber-900/50' : 'bg-slate-800/50 border-slate-800'}`}>
           <div className="flex items-center gap-2">
             <span className={`text-xs font-semibold uppercase tracking-wider ${isReviewMode ? 'text-indigo-300' : diffBase ? 'text-amber-300' : 'text-slate-400'}`}>
                 {diffBase ? 'History Preview' : label}
@@ -300,11 +300,11 @@ const RichEditor: React.FC<RichEditorProps> = ({
           </div>
         </div>
         
-        <div className="flex-1 relative">
+        <div className="flex-1 relative overflow-hidden">
              {renderContent()}
         </div>
         
-        <div className="px-4 py-2 bg-slate-900/80 border-t border-slate-800 text-[10px] text-slate-500 flex justify-between items-center flex-shrink-0">
+        <div className="px-3 md:px-4 py-2 bg-slate-900/80 border-t border-slate-800 text-[10px] text-slate-500 flex justify-between items-center flex-shrink-0">
           <span>{isReviewMode ? 'Click highlighted text to fix' : diffBase ? 'Showing changes from previous version' : 'Markdown Supported'}</span>
           <span>{value.length} characters</span>
         </div>
@@ -313,9 +313,9 @@ const RichEditor: React.FC<RichEditorProps> = ({
       {activePopover && activeIssue && (
         <div 
           ref={popoverRef}
-          className="fixed z-[9999] w-72 bg-slate-800 border border-slate-700 shadow-2xl rounded-xl p-4 animate-in fade-in zoom-in-95 duration-200"
+          className="fixed z-[9999] w-[calc(100vw-32px)] sm:w-72 bg-slate-800 border border-slate-700 shadow-2xl rounded-xl p-4 animate-in fade-in zoom-in-95 duration-200"
           style={{
-            left: activePopover.x,
+            left: Math.min(Math.max(16, activePopover.x), window.innerWidth - 16),
             top: activePopover.y,
             transform: `translate(-50%, ${activePopover.align === 'top' ? '-100%' : '0'})`
           }}
