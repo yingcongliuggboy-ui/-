@@ -92,7 +92,7 @@ const App: React.FC = () => {
     // addToHistory(targetText, targetText, 'Pre-audit snapshot'); // Redundant if no change
     
     try {
-      const report = await auditText(sourceText, targetText, selectedLang);
+      const report = await auditText(sourceText, targetText, selectedLang, selectedTone);
       
       if (abortController.signal.aborted) {
           return;
