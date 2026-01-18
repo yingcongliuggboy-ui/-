@@ -1,4 +1,3 @@
-
 {
   "name": "copyflow",
   "private": true,
@@ -10,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "^0.2.1",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "http-proxy": "^1.18.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

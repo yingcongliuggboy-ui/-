@@ -4,7 +4,7 @@ export enum AppMode {
   AUDIT = 'audit'
 }
 
-export type LanguageCode = 'en-US' | 'en-GB' | 'fr-FR' | 'de-DE';
+export type LanguageCode = 'en-US' | 'en-GB' | 'fr-FR' | 'de-DE' | 'es-ES' | 'ja-JP' | 'ko-KR' | 'it-IT' | 'pt-PT' | 'nl-NL';
 
 export interface LanguageOption {
   code: LanguageCode;

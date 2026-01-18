@@ -6,7 +6,13 @@ export const LANGUAGES: LanguageOption[] = [
   { code: 'en-US', name: 'English (US)', flag: '🇺🇸', description: 'Direct, Commercial' },
   { code: 'en-GB', name: 'English (UK)', flag: '🇬🇧', description: 'Gentle, Formal' },
   { code: 'fr-FR', name: 'French', flag: '🇫🇷', description: 'Romantic, Polite' },
-  { code: 'de-DE', name: 'German', flag: '🇩🇪', description: 'Precise, Structured' }
+  { code: 'de-DE', name: 'German', flag: '🇩🇪', description: 'Precise, Structured' },
+  { code: 'es-ES', name: 'Spanish', flag: '🇪🇸', description: 'Passionate, Expressive' },
+  { code: 'ja-JP', name: 'Japanese', flag: '🇯🇵', description: 'Polite, Respectful' },
+  { code: 'ko-KR', name: 'Korean', flag: '🇰🇷', description: 'Formal, Respectful' },
+  { code: 'it-IT', name: 'Italian', flag: '🇮🇹', description: 'Elegant, Expressive' },
+  { code: 'pt-PT', name: 'Portuguese', flag: '🇵🇹', description: 'Warm, Friendly' },
+  { code: 'nl-NL', name: 'Dutch', flag: '🇳🇱', description: 'Direct, Practical' }
 ];
 
 export const TONES: ToneType[] = ['Professional', 'Casual', 'Promotional', 'Social Media'];

@@ -8,10 +8,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    server: {
+      host: '0.0.0.0',
+      port: 5173
+    },
     define: {
-      // Only define the specific API key. 
+      // Only define the specific API keys. 
       // DO NOT define 'process.env': {} as it breaks React's internal environment checks.
-      'process.env.API_KEY': JSON.stringify(env.API_KEY)
+      'process.env.OPENAI_API_KEY': JSON.stringify(env.OPENAI_API_KEY || process.env.OPENAI_API_KEY),
+      'process.env.OPENAI_API_BASE_URL': JSON.stringify(env.OPENAI_API_BASE_URL || process.env.OPENAI_API_BASE_URL)
     }
   };
 });

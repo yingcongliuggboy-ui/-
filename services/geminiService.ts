@@ -1,20 +1,10 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
 import { LanguageCode, ToneType, AuditReport, AuditIssue } from "../types";
 
-// Lazy initialization to prevent app crash on load if env is missing
-let aiInstance: GoogleGenAI | null = null;
-
-const getAiClient = () => {
-  if (!aiInstance) {
-    const apiKey = process.env.API_KEY || "";
-    if (!apiKey) {
-      console.warn("API Key is missing. Please check your configuration.");
-    }
-    aiInstance = new GoogleGenAI({ apiKey });
-  }
-  return aiInstance;
-};
+// Use OpenAI-compatible API (available in Manus environment)
+// Use relative path to avoid CORS issues in browser
+const API_BASE_URL = '/api/v1';
+const API_KEY = process.env.OPENAI_API_KEY || '';
 
 export const translateTextStream = async (
   text: string,
@@ -22,8 +12,7 @@ export const translateTextStream = async (
   tone: ToneType,
   onChunk: (chunk: string) => void
 ) => {
-  const ai = getAiClient();
-  const model = "gemini-3-flash-preview";
+  // Note: Manus proxy doesn't support streaming, so we'll simulate it
   const systemInstruction = `Role: You are a professional copywriter and localization expert native in ${targetLang}.
 Task: Translate the user's Chinese text into the target language and specific country context.
 Requirements:
@@ -35,19 +24,42 @@ Requirements:
    - If Target is French or German, use appropriate formal/informal address based on tone.`;
 
   try {
-    const streamResponse = await ai.models.generateContentStream({
-      model,
-      contents: [{ parts: [{ text }] }],
-      config: {
-        systemInstruction,
-        temperature: 0.7,
+    const response = await fetch(`${API_BASE_URL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
       },
+      body: JSON.stringify({
+        model: 'gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemInstruction },
+          { role: 'user', content: text }
+        ],
+        temperature: 0.7,
+        stream: false
+      })
     });
 
-    for await (const chunk of streamResponse) {
-      if (chunk.text) {
-        onChunk(chunk.text);
-      }
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
+    }
+
+    // Get the complete response and simulate streaming by sending it in chunks
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    
+    if (!content) {
+      throw new Error('No content in API response');
+    }
+    
+    // Simulate streaming by sending content in chunks
+    const chunkSize = 5; // characters per chunk
+    for (let i = 0; i < content.length; i += chunkSize) {
+      const chunk = content.slice(i, i + chunkSize);
+      onChunk(chunk);
+      // Small delay to simulate streaming
+      await new Promise(resolve => setTimeout(resolve, 10));
     }
   } catch (error) {
     console.error("Translation error:", error);
@@ -60,8 +72,6 @@ export const auditText = async (
   targetText: string,
   targetLang: LanguageCode
 ): Promise<AuditReport> => {
-  const ai = getAiClient();
-  const model = "gemini-3-pro-preview";
   const systemInstruction = `Role: You are a strict compliance officer and linguistics expert.
 Task: Compare the Source Chinese Text with the Target Translation and generate a structured audit report in JSON.
 Context: The target language is ${targetLang}.
@@ -74,50 +84,62 @@ Checklist for evaluation:
 2. Nuance: Is it native-sounding? Detect any "Chinglish" or awkward phrasing.
 3. Safety: Are there sensitive, political, religious, or offensive words?
 4. Formatting: Is the structure consistent with the source?
-5. Ambiguity: Are there confusing or dual-meaning sentences?`;
+5. Ambiguity: Are there confusing or dual-meaning sentences?
+
+Return a JSON object with this structure:
+{
+  "score": <number 0-100>,
+  "summary": "<string>",
+  "issues": [
+    {
+      "type": "<Critical|Warning|Info>",
+      "category": "<Accuracy|Grammar|Safety|Style>",
+      "original_segment": "<Chinese text snippet>",
+      "target_segment": "<exact text from translation>",
+      "suggestion": "<proposed correction>",
+      "reason": "<explanation>"
+    }
+  ]
+}`;
 
   try {
-    const response = await ai.models.generateContent({
-      model,
-      contents: [{ 
-        parts: [{ 
-          text: `Source Chinese:
-${sourceText}
-
-Target Translation:
-${targetText}`
-        }] 
-      }],
-      config: {
-        systemInstruction,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            score: { type: Type.NUMBER, description: "A score from 0 to 100 representing translation quality." },
-            summary: { type: Type.STRING, description: "A concise overview of the audit findings." },
-            issues: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  type: { type: Type.STRING, description: "One of: Critical, Warning, Info" },
-                  category: { type: Type.STRING, description: "One of: Accuracy, Grammar, Safety, Style" },
-                  original_segment: { type: Type.STRING, description: "The specific Chinese text snippet" },
-                  target_segment: { type: Type.STRING, description: "The exact text substring from the translation that has the issue" },
-                  suggestion: { type: Type.STRING, description: "Proposed correction" },
-                  reason: { type: Type.STRING, description: "Explanation of the issue" }
-                },
-                required: ["type", "category", "original_segment", "target_segment", "suggestion", "reason"]
-              }
-            }
-          },
-          required: ["score", "summary", "issues"]
-        }
+    const response = await fetch(`${API_BASE_URL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
       },
+      body: JSON.stringify({
+        model: 'gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemInstruction },
+          { role: 'user', content: `Source Chinese:\n${sourceText}\n\nTarget Translation:\n${targetText}` }
+        ],
+        temperature: 0.3,
+        response_format: { type: 'json_object' }
+      })
     });
 
-    const report = JSON.parse(response.text?.trim() || "{}") as AuditReport;
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    let content = data.choices?.[0]?.message?.content;
+    
+    if (!content) {
+      throw new Error('No content in API response');
+    }
+    
+    // Remove markdown code blocks if present
+    content = content.trim();
+    if (content.startsWith('```json')) {
+      content = content.replace(/^```json\n/, '').replace(/\n```$/, '');
+    } else if (content.startsWith('```')) {
+      content = content.replace(/^```\n/, '').replace(/\n```$/, '');
+    }
+
+    const report = JSON.parse(content) as AuditReport;
     
     // Post-process to add IDs and initial status
     if (report.issues) {
@@ -127,9 +149,9 @@ ${targetText}`
         status: 'pending'
       }));
     } else {
-        report.issues = [];
-        report.score = 0;
-        report.summary = "Failed to parse report.";
+      report.issues = [];
+      report.score = report.score || 0;
+      report.summary = report.summary || "No issues found.";
     }
 
     return report;
